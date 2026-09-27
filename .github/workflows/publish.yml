@@ -1,49 +1,25 @@
 name: Publish
 
 on:
-  push:
-    branches: [main]
+  pull_request:
+    types: [closed]
 
 jobs:
-  publish:
+  promote:
+    if: github.event.pull_request.merged == true
     runs-on: k8s-amd64
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Build and push the test-stage image
+      - name: Promote the PR's already-built image to the deployed tag
         uses: mattjmorrison-homelab/actions-k8s@955b466878ae777505b822bb6c241f4f4e6805b5 # main
         with:
           service-account: app-backstage-job
-          image: gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698
+          image: gcr.io/go-containerregistry/crane@sha256:1f968817b95790bed063f71175aa6b8ff879fa17064020415f3e18bb6e6a36e1
           shell: "false"
           command: >-
-            --context=git://github.com/mattjmorrison-homelab/app-backstage.git#refs/heads/main
-            --dockerfile=Dockerfile --skip-unused-stages=true --target=test --destination=registry.morrisons.site/app-backstage-test:${{ github.sha }}
-            --snapshot-mode=redo
+            tag registry.morrisons.site/app-backstage:pr-${{ github.event.pull_request.head.sha }}
+            registry.morrisons.site/app-backstage:${{ github.event.pull_request.head.sha }}
           secret-volume: app-backstage-zot-pull-secret:/kaniko/.docker
-          active-deadline-seconds: "1800"
-
-      - name: Run tests inside the just-built test image
-        uses: mattjmorrison-homelab/actions-k8s@955b466878ae777505b822bb6c241f4f4e6805b5 # main
-        with:
-          service-account: app-backstage-job
-          image: registry.morrisons.site/app-backstage-test:${{ github.sha }}
-          command: yarn test
-          env: CI=true
-
-      - name: Build and push the release image
-        uses: mattjmorrison-homelab/actions-k8s@955b466878ae777505b822bb6c241f4f4e6805b5 # main
-        with:
-          service-account: app-backstage-job
-          image: gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698
-          shell: "false"
-          command: >-
-            --context=git://github.com/mattjmorrison-homelab/app-backstage.git#refs/heads/main
-            --dockerfile=Dockerfile --skip-unused-stages=true --target=release --build-arg=COMMIT_SHA=${{ github.sha }}
-            --destination=registry.morrisons.site/app-backstage:${{ github.sha }}
-            --snapshot-mode=redo
-          secret-volume: app-backstage-zot-pull-secret:/kaniko/.docker
-          active-deadline-seconds: "1800"
+          active-deadline-seconds: "120"
 
       - name: Notify Discord on failure
         if: failure()
@@ -55,5 +31,5 @@ jobs:
       - if: failure()
         run: >-
           curl -sf -H "Content-Type: application/json" -X POST
-          -d "{\"content\": \"🔴 **app-backstage** build failed — ${{ github.sha }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          -d "{\"content\": \"🔴 **app-backstage** promote failed — ${{ github.event.pull_request.head.sha }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
           "$DISCORD_WEBHOOK_URL"
