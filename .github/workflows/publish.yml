@@ -29,6 +29,7 @@ jobs:
           service-account: app-backstage-job
           image: registry.morrisons.site/app-backstage-test:${{ github.sha }}
           command: yarn test
+          env: CI=true
 
       - name: Build and push the release image
         uses: mattjmorrison-homelab/actions-k8s@955b466878ae777505b822bb6c241f4f4e6805b5 # main
