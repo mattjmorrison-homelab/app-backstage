@@ -10,14 +10,14 @@ jobs:
     runs-on: k8s-amd64
     steps:
       - name: Promote the PR's already-built image to the deployed tag
-        uses: mattjmorrison-homelab/actions-k8s@955b466878ae777505b822bb6c241f4f4e6805b5 # main
+        uses: mattjmorrison-homelab/actions-k8s@971b9624457dae1aaf5439e83ad4e84d75d4edea # main
         with:
           service-account: app-backstage-job
           image: gcr.io/go-containerregistry/crane@sha256:1f968817b95790bed063f71175aa6b8ff879fa17064020415f3e18bb6e6a36e1
           shell: "false"
           command: >-
             tag registry.morrisons.site/app-backstage:pr-${{ github.event.pull_request.head.sha }}
-            registry.morrisons.site/app-backstage:${{ github.event.pull_request.head.sha }}
+            ${{ github.event.pull_request.head.sha }}
           env: DOCKER_CONFIG=/kaniko/.docker
           secret-volume: app-backstage-zot-pull-secret:/kaniko/.docker
           active-deadline-seconds: "120"
