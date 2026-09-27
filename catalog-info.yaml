@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: app-backstage
+  description: This homelab's Backstage instance (dependency/relationship catalog, todo #41).
+  annotations:
+    github.com/project-slug: mattjmorrison-homelab/app-backstage
+spec:
+  type: website
+  owner: mattjmorrison
+  lifecycle: experimental

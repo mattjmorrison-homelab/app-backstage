@@ -1,0 +1,35 @@
+name: Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check:
+    runs-on: k8s-amd64
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Validate the test-stage Dockerfile still builds
+        uses: mattjmorrison-homelab/actions-k8s@955b466878ae777505b822bb6c241f4f4e6805b5 # main
+        with:
+          service-account: app-backstage-job
+          image: gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698
+          shell: "false"
+          command: >-
+            --context=git://github.com/mattjmorrison-homelab/app-backstage.git#refs/heads/${{ github.head_ref }}
+            --dockerfile=Dockerfile --skip-unused-stages=true --target=test --no-push
+            --snapshot-mode=redo
+          active-deadline-seconds: "1800"
+
+      - name: Validate the release-stage Dockerfile still builds
+        uses: mattjmorrison-homelab/actions-k8s@955b466878ae777505b822bb6c241f4f4e6805b5 # main
+        with:
+          service-account: app-backstage-job
+          image: gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698
+          shell: "false"
+          command: >-
+            --context=git://github.com/mattjmorrison-homelab/app-backstage.git#refs/heads/${{ github.head_ref }}
+            --dockerfile=Dockerfile --skip-unused-stages=true --target=release --build-arg=COMMIT_SHA=${{ github.event.pull_request.head.sha }} --no-push
+            --snapshot-mode=redo
+          active-deadline-seconds: "1800"
