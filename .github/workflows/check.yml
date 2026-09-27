@@ -19,6 +19,7 @@ jobs:
           command: >-
             --context=git://github.com/mattjmorrison-homelab/app-backstage.git#refs/heads/${{ github.head_ref }}
             --dockerfile=Dockerfile --skip-unused-stages=true --target=test --no-push
+            --snapshot-mode=redo
           active-deadline-seconds: "1800"
 
       - name: Validate the release-stage Dockerfile still builds
@@ -30,4 +31,5 @@ jobs:
           command: >-
             --context=git://github.com/mattjmorrison-homelab/app-backstage.git#refs/heads/${{ github.head_ref }}
             --dockerfile=Dockerfile --skip-unused-stages=true --target=release --build-arg=COMMIT_SHA=${{ github.event.pull_request.head.sha }} --no-push
+            --snapshot-mode=redo
           active-deadline-seconds: "1800"

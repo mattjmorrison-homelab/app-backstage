@@ -19,6 +19,7 @@ jobs:
           command: >-
             --context=git://github.com/mattjmorrison-homelab/app-backstage.git#refs/heads/main
             --dockerfile=Dockerfile --skip-unused-stages=true --target=test --destination=registry.morrisons.site/app-backstage-test:${{ github.sha }}
+            --snapshot-mode=redo
           secret-volume: app-backstage-zot-pull-secret:/kaniko/.docker
           active-deadline-seconds: "1800"
 
@@ -39,6 +40,7 @@ jobs:
             --context=git://github.com/mattjmorrison-homelab/app-backstage.git#refs/heads/main
             --dockerfile=Dockerfile --skip-unused-stages=true --target=release --build-arg=COMMIT_SHA=${{ github.sha }}
             --destination=registry.morrisons.site/app-backstage:${{ github.sha }}
+            --snapshot-mode=redo
           secret-volume: app-backstage-zot-pull-secret:/kaniko/.docker
           active-deadline-seconds: "1800"
 

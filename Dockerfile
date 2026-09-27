@@ -14,6 +14,15 @@
 # image) -- that's about the stage's base image, not about copying
 # files from an earlier stage. release's own FROM here is still an
 # external image, so it's unaffected.
+#
+# That alone wasn't enough, though: kaniko still snapshots the *entire*
+# filesystem after every RUN, even in the `build`/`test` stages, and a
+# fresh yarn install here is 1GB+ across 2800+ packages -- slow/fragile
+# on this cluster's runners regardless of which stage carries it. So:
+# install/tsc/build:backend are chained into one RUN (fewer full-tree
+# snapshots), and check.yml/publish.yml pass kaniko --snapshot-mode=redo
+# (inspects only what the just-run command actually touched, instead of
+# re-hashing every file) for the same reason.
 
 FROM node:24-bookworm AS test
 WORKDIR /app
@@ -29,9 +38,9 @@ COPY . .
 ARG COMMIT_SHA
 ENV COMMIT_SHA=$COMMIT_SHA
 ENV NODE_ENV=production
-RUN yarn install --immutable
-RUN yarn tsc
-RUN yarn build:backend
+RUN yarn install --immutable && \
+    yarn tsc && \
+    yarn build:backend
 
 FROM node:24-trixie-slim AS release
 # better-sqlite3 ships prebuilt binaries for this platform -- just the
