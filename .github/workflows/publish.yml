@@ -1,0 +1,56 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish:
+    runs-on: k8s-amd64
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Build and push the test-stage image
+        uses: mattjmorrison-homelab/actions-k8s@955b466878ae777505b822bb6c241f4f4e6805b5 # main
+        with:
+          service-account: app-backstage-job
+          image: gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698
+          shell: "false"
+          command: >-
+            --context=git://github.com/mattjmorrison-homelab/app-backstage.git#refs/heads/main
+            --dockerfile=Dockerfile --skip-unused-stages=true --target=test --destination=registry.morrisons.site/app-backstage-test:${{ github.sha }}
+          secret-volume: app-backstage-zot-pull-secret:/kaniko/.docker
+          active-deadline-seconds: "1800"
+
+      - name: Run tests inside the just-built test image
+        uses: mattjmorrison-homelab/actions-k8s@955b466878ae777505b822bb6c241f4f4e6805b5 # main
+        with:
+          service-account: app-backstage-job
+          image: registry.morrisons.site/app-backstage-test:${{ github.sha }}
+          command: test
+
+      - name: Build and push the release image
+        uses: mattjmorrison-homelab/actions-k8s@955b466878ae777505b822bb6c241f4f4e6805b5 # main
+        with:
+          service-account: app-backstage-job
+          image: gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698
+          shell: "false"
+          command: >-
+            --context=git://github.com/mattjmorrison-homelab/app-backstage.git#refs/heads/main
+            --dockerfile=Dockerfile --skip-unused-stages=true --target=release --build-arg=COMMIT_SHA=${{ github.sha }}
+            --destination=registry.morrisons.site/app-backstage:${{ github.sha }}
+          secret-volume: app-backstage-zot-pull-secret:/kaniko/.docker
+          active-deadline-seconds: "1800"
+
+      - name: Notify Discord on failure
+        if: failure()
+        uses: mattjmorrison-homelab/actions-openbao@a9a15ee54f4b6a08b17ddd55df99d5109cfb5748 # main
+        with:
+          role: app-backstage-discord
+          kv-path: homelab/service/admin-discord/app-backstage/webhook-url
+          output-name: DISCORD_WEBHOOK_URL
+      - if: failure()
+        run: >-
+          curl -sf -H "Content-Type: application/json" -X POST
+          -d "{\"content\": \"🔴 **app-backstage** build failed — ${{ github.sha }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          "$DISCORD_WEBHOOK_URL"
