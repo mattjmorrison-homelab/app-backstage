@@ -17,7 +17,7 @@ jobs:
           shell: "false"
           command: >-
             tag registry.morrisons.site/app-backstage:pr-${{ github.event.pull_request.head.sha }}
-            registry.morrisons.site/app-backstage:${{ github.event.pull_request.head.sha }}
+            ${{ github.event.pull_request.head.sha }}
           env: DOCKER_CONFIG=/kaniko/.docker
           secret-volume: app-backstage-zot-pull-secret:/kaniko/.docker
           active-deadline-seconds: "120"
