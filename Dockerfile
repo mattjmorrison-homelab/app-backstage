@@ -64,14 +64,29 @@ RUN yarn test
 ENV NODE_ENV=production
 RUN yarn tsc && yarn build:backend
 
-FROM base AS release
+# Independent external FROM, not `FROM base` -- confirmed directly:
+# kaniko pushes a Docker-v2-schema manifest Zot rejects (MANIFEST_INVALID)
+# when a *pushed* stage's own FROM chains to another local Dockerfile
+# stage instead of an external image (same issue graph-hdmi-switch's
+# Dockerfile documents). build's own `FROM base` is fine -- build is
+# never pushed directly, only used as a COPY --from source. release IS
+# pushed, so it copies base's installed state as files instead.
+FROM node:24-trixie-slim AS release
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends libsqlite3-dev && \
+    rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --chown=node:node --from=base /app/node_modules ./node_modules
+COPY --chown=node:node --from=base /app/package.json /app/yarn.lock /app/.yarnrc.yml /app/backstage.json ./
+COPY --chown=node:node --from=base /app/packages ./packages
 COPY --chown=node:node --from=build /app/packages/backend/dist/bundle.tar.gz /app/app-config*.yaml ./
 RUN tar xzf bundle.tar.gz && rm bundle.tar.gz
-# base's own /app ends up owned by root with no group/other access
-# (yarn's install appears to lock it down -- confirmed directly: the
-# app boots fine as root, fails to resolve packages/backend at all as
-# node, and /app itself is drwx------ root root). Fix ownership right
-# before actually switching to the non-root user.
+# WORKDIR creates /app as root regardless of any COPY --chown that
+# happens afterward -- confirmed directly: the app boots fine as root,
+# fails to resolve packages/backend at all as node, and /app itself is
+# drwx------ root root. Fix ownership right before switching users.
 RUN chown -R node:node /app
 USER node
 EXPOSE 7007
