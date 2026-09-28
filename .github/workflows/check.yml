@@ -16,11 +16,21 @@ jobs:
           service-account: app-backstage-job
           image: gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698
           shell: "false"
+          # TEMPORARY DIAGNOSTIC (PR #13, restore-kaniko-snapshot-flags): the
+          # --snapshot-mode=redo --use-new-run=true flags below are commented
+          # out of the command args to test whether they caused two
+          # consecutive real CI failures with:
+          #   error building image: error building stage: failed to get
+          #   filesystem from image: stream error: stream ID 29;
+          #   INTERNAL_ERROR; received from peer
+          # This error started immediately after these flags were added and
+          # never occurred before (PR #12 built successfully with the same
+          # base images). Restore these flags once the cause is ruled in or
+          # out.
           command: >-
             --context=git://github.com/mattjmorrison-homelab/app-backstage.git#refs/heads/${{ github.head_ref }}
             --dockerfile=Dockerfile --skip-unused-stages=true --target=release
             --build-arg=COMMIT_SHA=${{ github.event.pull_request.head.sha }}
             --destination=registry.morrisons.site/app-backstage:pr-${{ github.event.pull_request.head.sha }}
-            --snapshot-mode=redo --use-new-run=true
           secret-volume: app-backstage-zot-pull-secret:/kaniko/.docker
           active-deadline-seconds: "1800"
