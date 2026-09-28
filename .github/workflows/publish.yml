@@ -10,7 +10,7 @@ jobs:
     runs-on: k8s-amd64
     steps:
       - name: Promote the PR's already-built image to the deployed tag
-        uses: mattjmorrison-homelab/actions-k8s@783eecf83abb0281fc6f70f200b9104ce7fbf724 # main
+        uses: mattjmorrison-homelab/actions-k8s@bcd046d4581cc4ffce4de813396f81420ce32e30 # main
         with:
           service-account: app-backstage-job
           image: gcr.io/go-containerregistry/crane@sha256:1f968817b95790bed063f71175aa6b8ff879fa17064020415f3e18bb6e6a36e1

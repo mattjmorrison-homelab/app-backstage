@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Build, test, and push the staging image
-        uses: mattjmorrison-homelab/actions-k8s@783eecf83abb0281fc6f70f200b9104ce7fbf724 # main
+        uses: mattjmorrison-homelab/actions-k8s@bcd046d4581cc4ffce4de813396f81420ce32e30 # main
         with:
           service-account: app-backstage-job
           image: gcr.io/kaniko-project/executor@sha256:4e7a52dd1f14872430652bb3b027405b8dfd17c4538751c620ac005741ef9698
