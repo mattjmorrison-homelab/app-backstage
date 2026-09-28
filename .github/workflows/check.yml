@@ -21,6 +21,5 @@ jobs:
             --dockerfile=Dockerfile --skip-unused-stages=true --target=release
             --build-arg=COMMIT_SHA=${{ github.event.pull_request.head.sha }}
             --destination=registry.morrisons.site/app-backstage:pr-${{ github.event.pull_request.head.sha }}
-            --snapshot-mode=redo --use-new-run=true
           secret-volume: app-backstage-zot-pull-secret:/kaniko/.docker
           active-deadline-seconds: "1800"
