@@ -64,6 +64,20 @@ auth:
               dangerouslyAllowSignInWithoutUserInCatalog: true
 
 catalog:
+  # Discovers catalog-info.yaml files across the org on a schedule, using
+  # the GitHub App configured under integrations.github above. No webhook
+  # needed -- this polls instead of reacting to push events.
+  providers:
+    github:
+      homelab:
+        organization: 'mattjmorrison-homelab'
+        catalogPath: '/catalog-info.yaml'
+        filters:
+          branch: 'main'
+        schedule:
+          frequency: { minutes: 30 }
+          timeout: { minutes: 3 }
+
   # Overrides the default list locations from app-config.yaml as these contain example data.
   # See https://backstage.io/docs/features/software-catalog/#adding-components-to-the-catalog for more details
   # on how to get entities into the catalog.
