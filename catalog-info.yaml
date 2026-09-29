@@ -9,3 +9,11 @@ spec:
   type: website
   owner: mattjmorrison
   lifecycle: experimental
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: platform
+  description: Shared cluster infrastructure that other services have a direct, traceable dependency on (e.g. image registry, secret store).
+spec:
+  owner: mattjmorrison-homelab
