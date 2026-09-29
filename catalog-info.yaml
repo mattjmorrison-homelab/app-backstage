@@ -7,13 +7,218 @@ metadata:
     github.com/project-slug: mattjmorrison-homelab/app-backstage
 spec:
   type: website
-  owner: mattjmorrison
+  owner: mattjmorrison-homelab
   lifecycle: experimental
+  system: backstage
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: platform
+  description: Shared cluster infrastructure with a direct, traceable dependency from consumers, actively interacted with via its own UI/API -- not ambient substrate.
+spec:
+  owner: mattjmorrison-homelab
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: infrastructure
+  description: Ambient cluster substrate other things route through or rely on, without a direct per-consumer relationship.
+spec:
+  owner: mattjmorrison-homelab
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: hardware
+  description: Physical device provisioning and fleet management.
+spec:
+  owner: mattjmorrison-homelab
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: application
+  description: End-user-facing applications.
+spec:
+  owner: mattjmorrison-homelab
 ---
 apiVersion: backstage.io/v1alpha1
 kind: System
 metadata:
-  name: platform
-  description: Shared cluster infrastructure that other services have a direct, traceable dependency on (e.g. image registry, secret store).
+  name: argocd
+  description: GitOps deployment engine and its supporting tooling.
 spec:
   owner: mattjmorrison-homelab
+  domain: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: garage
+  description: Self-hosted S3-compatible object storage.
+spec:
+  owner: mattjmorrison-homelab
+  domain: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: zot
+  description: Internal container registry.
+spec:
+  owner: mattjmorrison-homelab
+  domain: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: openbao
+  description: Secrets store.
+spec:
+  owner: mattjmorrison-homelab
+  domain: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: homepage
+  description: Dashboard linking to the cluster's other services.
+spec:
+  owner: mattjmorrison-homelab
+  domain: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: backstage
+  description: This software catalog itself.
+spec:
+  owner: mattjmorrison-homelab
+  domain: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: pihole
+  description: DNS and ad-blocking, actively managed via its own admin UI.
+spec:
+  owner: mattjmorrison-homelab
+  domain: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: monitoring
+  description: Metrics collection, alerting, and visualization.
+spec:
+  owner: mattjmorrison-homelab
+  domain: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: api
+  description: Shared architecture supporting APIs across the homelab (federated GraphQL gateway).
+spec:
+  owner: mattjmorrison-homelab
+  domain: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: home-automation
+  description: Shared home-automation platform (Home Assistant, Matter).
+spec:
+  owner: mattjmorrison-homelab
+  domain: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: traefik
+  description: Ingress controller.
+spec:
+  owner: mattjmorrison-homelab
+  domain: infrastructure
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: cert-manager
+  description: TLS certificate issuance.
+spec:
+  owner: mattjmorrison-homelab
+  domain: infrastructure
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: coredns
+  description: In-cluster DNS resolution.
+spec:
+  owner: mattjmorrison-homelab
+  domain: infrastructure
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: rbac
+  description: Cluster and CI permission grants.
+spec:
+  owner: mattjmorrison-homelab
+  domain: infrastructure
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: github-runner
+  description: Self-hosted GitHub Actions runners.
+spec:
+  owner: mattjmorrison-homelab
+  domain: infrastructure
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: external-secrets
+  description: Syncs OpenBao secrets into Kubernetes Secrets.
+spec:
+  owner: mattjmorrison-homelab
+  domain: infrastructure
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: dns-networking
+  description: External DNS and network configuration.
+spec:
+  owner: mattjmorrison-homelab
+  domain: infrastructure
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: automation
+  description: Org-level GitHub and Discord configuration automation.
+spec:
+  owner: mattjmorrison-homelab
+  domain: infrastructure
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: ci
+  description: Shared reusable GitHub Actions used across every repo's CI.
+spec:
+  owner: mattjmorrison-homelab
+  domain: infrastructure
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: provisioning
+  description: Physical device provisioning and fleet management.
+spec:
+  owner: mattjmorrison-homelab
+  domain: hardware
